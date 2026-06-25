@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Room {
+  code      String   @id @db.VarChar(6)
+  hostName  String   @map("host_name") @db.VarChar(30)
+  players   Json     @default("[]")
+  gameState Json     @map("game_state") @default("{}")
+  status    String   @default("waiting") @db.VarChar(10)
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at") @updatedAt
+
+  @@map("rooms")
+}
