@@ -15,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" data-theme="dark">
       <body>
-        <GameProvider>{children}</GameProvider>
+        <div className="app-wrapper">
+          <GameProvider>{children}</GameProvider>
+        </div>
       </body>
     </html>
   );
