@@ -1,0 +1,130 @@
+.container {
+  display: flex; flex-direction: column; min-height: 100dvh;
+  padding: 2rem 1rem; position: relative; z-index: 1; gap: 1.5rem;
+}
+.header { text-align: center; margin-top: 1rem; }
+.headerSub {
+  font-size: 0.75rem; color: var(--color-text-muted);
+  letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.25rem;
+}
+.headerTitle {
+  font-family: var(--font-display); font-size: 1.875rem; color: var(--color-text);
+}
+.headerDesc {
+  font-size: 0.875rem; color: var(--color-text-faint); margin-top: 0.5rem;
+}
+
+.content {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  align-items: center; width: 100%; max-width: 400px; margin: 0 auto; gap: 2.5rem;
+}
+
+.timerWrapper {
+  position: relative; width: 280px; height: 280px; flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .timerWrapper { width: 320px; height: 320px; }
+}
+
+.timerDisplay {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.timerValue {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 5rem; font-variant-numeric: tabular-nums;
+  line-height: 1; margin-bottom: 0.5rem;
+}
+@media (min-width: 640px) {
+  .timerValue { font-size: 6rem; }
+}
+.timerStatus {
+  font-size: 0.625rem; font-weight: 700; color: var(--color-text-faint);
+  letter-spacing: 0.2em; text-transform: uppercase;
+  background: var(--color-surface-2); padding: 0.375rem 1rem;
+  border-radius: 9999px; border: 1px solid var(--color-border);
+}
+
+.controlsWrapper { width: 100%; }
+
+.durationCard { padding: 1.25rem; width: 100%; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.durationTitle {
+  font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted);
+  text-align: center; margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.durationGrid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;
+}
+.durationBtn {
+  min-height: 48px; border-radius: var(--radius-md); font-size: 0.875rem;
+  font-weight: 600; transition: all 0.2s;
+}
+.durationBtn:active { transform: scale(0.98); }
+.durationBtnActive {
+  background: var(--color-primary); color: #141210; border-color: transparent;
+}
+.durationBtnInactive {
+  background: var(--color-surface); color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+.durationBtnInactive:hover {
+  border-color: var(--color-primary); color: var(--color-text);
+}
+
+.activeControls {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.activeButtons {
+  display: flex; gap: 1rem; align-items: center; justify-content: center; width: 100%;
+}
+.adjustBtn {
+  width: 3.5rem; height: 3.5rem; border-radius: 9999px; background: var(--color-surface-2);
+  border: 1px solid var(--color-border); display: flex; align-items: center;
+  justify-content: center; font-size: 1.125rem; color: var(--color-text-muted);
+  transition: colors 0.2s;
+}
+.adjustBtn:hover { color: var(--color-primary); border-color: var(--color-primary); }
+.adjustBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.playPauseBtn {
+  width: 5rem; height: 5rem; border-radius: 9999px; display: flex;
+  align-items: center; justify-content: center; font-size: 1.875rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: transform 0.2s;
+}
+.playPauseBtn:hover { transform: scale(1.05); }
+.playPauseBtn:active { transform: scale(0.95); }
+.playPauseRunning {
+  background: var(--color-surface-dynamic); color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+.playPauseStopped {
+  background: var(--color-primary); color: var(--color-bg); border: none;
+}
+
+.resetBtn {
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.05em;
+  color: var(--color-text-faint); text-transform: uppercase;
+  transition: color 0.2s; background: none; border: none;
+}
+.resetBtn:hover { color: var(--color-text); }
+
+.footer {
+  margin-top: auto; padding-top: 1rem; padding-bottom: env(safe-area-inset-bottom, 1rem);
+  position: relative; z-index: 10; width: 100%; max-width: 400px;
+  margin-left: auto; margin-right: auto; text-align: center;
+  border-top: 1px solid var(--color-divider);
+}
+.endBtn {
+  font-size: 0.875rem; font-weight: 600; color: var(--color-text-muted);
+  transition: color 0.2s; padding: 0.75rem 1.5rem; background: none; border: none;
+}
+.endBtn:hover { color: var(--color-primary); }
+
+.timeupBanner {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: var(--color-red); color: white; text-align: center;
+  padding: 1.25rem 0; font-weight: 700; font-size: 1.125rem;
+  box-shadow: 0 -10px 40px rgba(239, 68, 68, 0.3);
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}

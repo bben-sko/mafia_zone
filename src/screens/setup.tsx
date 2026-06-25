@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGame } from '@/context/game-context';
-import { Button, Modal, TeamBadge } from '@/components/ui';
+import { Button, Input, Modal, TeamBadge } from '@/components/ui';
 import { RoleConfig } from '@/lib/game-types';
 import { ROLE_INFO } from '@/lib/roles';
+import styles from './setup.module.css';
 
 /* ---------- data ---------- */
 
@@ -69,20 +70,16 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
       type="button"
       onClick={onChange}
       aria-pressed={on}
-      className={`relative h-6 w-11 flex-shrink-0 rounded-full border transition-colors duration-200 ${
-        on ? 'border-[var(--color-primary)] bg-[var(--color-primary)]' : 'border-[var(--color-border)] bg-[var(--color-surface-dynamic)]'
-      }`}
+      className={`${styles.toggle} ${on ? styles.toggleOn : styles.toggleOff}`}
     >
-      <span className={`absolute top-[3px] h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-200 ${
-        on ? 'left-[3px]' : 'left-[21px]'
-      }`} />
+      <span className={`${styles.toggleKnob} ${on ? styles.toggleKnobOn : styles.toggleKnobOff}`} />
     </button>
   );
 }
 
-function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function Panel({ children, className = '', style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
-    <div className={`rounded-md border border-[var(--color-border)] bg-[rgba(20,18,16,0.74)] shadow-[0_18px_70px_rgba(0,0,0,0.28)] backdrop-blur-sm ${className}`}>
+    <div className={`card-base ${className}`} style={style}>
       {children}
     </div>
   );
@@ -90,9 +87,9 @@ function Panel({ children, className = '' }: { children: React.ReactNode; classN
 
 function PanelTitle({ title, meta }: { title: string; meta?: string }) {
   return (
-    <div className="mb-4 flex items-center justify-between gap-4">
-      <h2 className="font-display text-xl text-[var(--color-primary)]">{title}</h2>
-      {meta && <span className="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-muted)] tabular-nums">{meta}</span>}
+    <div className={styles.rolesHeader} style={{borderBottom: 'none', paddingBottom: 0}}>
+      <h2 className={styles.rolesTitle}>{title}</h2>
+      {meta && <span className={styles.catCount}>{meta}</span>}
     </div>
   );
 }
@@ -110,55 +107,45 @@ function Category({ cat, n, specials, onInfo, onCustom }: {
   }).length;
 
   return (
-    <div className="overflow-hidden rounded-md border border-[var(--color-border)] bg-[rgba(26,24,22,0.68)]">
+    <div className={styles.catWrapper}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-4 px-4 py-3 text-start transition-colors duration-150 hover:bg-[var(--color-surface-offset)]"
+        className={styles.catHeader}
         aria-expanded={open}
       >
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold uppercase tracking-[0.08em] text-[var(--color-text)]">{cat.label}</span>
-            <span className="rounded-full bg-[var(--color-surface-dynamic)] px-2 py-0.5 text-[11px] text-[var(--color-text-muted)] tabular-nums">
-              {enabled}/{cat.roles.length}
-            </span>
+        <div className={styles.catHeaderLeft}>
+          <div className={styles.catHeaderRow}>
+            <span className={styles.catLabel}>{cat.label}</span>
+            <span className={styles.catCount}>{enabled}/{cat.roles.length}</span>
           </div>
-          <div className="mt-0.5 text-xs text-[var(--color-text-faint)]">{cat.hint}</div>
+          <div className={styles.catHint}>{cat.hint}</div>
         </div>
-        <svg className={`w-3 h-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-        >
+        <svg className={`${styles.catIcon} ${open ? styles.catIconOpen : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
       {open && (
-        <div className="divide-y divide-[var(--color-divider)] border-t border-[var(--color-border)]">
+        <div className={styles.catBody}>
           {cat.roles.map(role => {
             if (role.hasCounter) {
               return (
-                <div key={role.id} className="flex min-h-14 items-center justify-between gap-3 px-4 py-3">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full" style={{ background: role.color }} />
-                    <span className="truncate text-sm text-[var(--color-text)]">{role.label}</span>
+                <div key={role.id} className={styles.roleRow}>
+                  <div className={styles.roleLeft}>
+                    <span className={styles.roleDot} style={{ background: role.color }} />
+                    <span className={styles.roleLabel}>{role.label}</span>
                   </div>
-                  <div className="flex flex-shrink-0 items-center gap-2" dir="ltr">
+                  <div className={styles.roleRight} dir="ltr">
                     <button
-                      className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] text-base font-bold text-[var(--color-text)] transition-all hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-30"
-                      onClick={() => {
-                        onCustom();
-                        dispatch({ type: 'CHANGE_MAFIA', delta: -1 });
-                      }}
+                      className={styles.counterBtn}
+                      onClick={() => { onCustom(); dispatch({ type: 'CHANGE_MAFIA', delta: -1 }); }}
                       disabled={state.roleConfig.mafia <= 1}
                       aria-label="نقص المافيا"
                     >−</button>
-                    <span className="min-w-8 text-center font-display text-lg leading-none text-[var(--color-primary)] tabular-nums">{state.roleConfig.mafia}</span>
+                    <span className={styles.counterVal}>{state.roleConfig.mafia}</span>
                     <button
-                      className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] text-base font-bold text-[var(--color-text)] transition-all hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-30"
-                      onClick={() => {
-                        onCustom();
-                        dispatch({ type: 'CHANGE_MAFIA', delta: 1 });
-                      }}
+                      className={styles.counterBtn}
+                      onClick={() => { onCustom(); dispatch({ type: 'CHANGE_MAFIA', delta: 1 }); }}
                       disabled={n - (state.roleConfig.mafia + 1) - specials < 1}
                       aria-label="زيد المافيا"
                     >+</button>
@@ -168,15 +155,15 @@ function Category({ cat, n, specials, onInfo, onCustom }: {
             }
             const on = state.roleConfig[role.id as keyof typeof state.roleConfig];
             return (
-              <div key={role.id} className="flex min-h-14 items-center justify-between gap-3 px-4 py-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full" style={{ background: role.color }} />
-                  <span className="truncate text-sm text-[var(--color-text)]">{role.label}</span>
+              <div key={role.id} className={styles.roleRow}>
+                <div className={styles.roleLeft}>
+                  <span className={styles.roleDot} style={{ background: role.color }} />
+                  <span className={styles.roleLabel}>{role.label}</span>
                 </div>
-                <div className="flex flex-shrink-0 items-center gap-3">
+                <div className={styles.roleRight}>
                   <button
                     type="button"
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--color-border)] text-xs text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                    className={styles.roleInfoBtn}
                     onClick={onInfo}
                     aria-label={`معلومات عن ${role.label}`}
                     title="معلومات عن الدور"
@@ -202,11 +189,14 @@ export default function Setup() {
   const [inputVal, setInputVal] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [preset, setPreset] = useState<Preset>('classic');
+  const [activeTab, setActiveTab] = useState<'players' | 'roles'>('players');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (activeTab === 'players') {
+      inputRef.current?.focus();
+    }
+  }, [activeTab]);
 
   const addPlayer = () => {
     const name = inputVal.trim();
@@ -232,215 +222,169 @@ export default function Setup() {
   else if (state.roleConfig.mafia >= n - state.roleConfig.mafia) warning = '⚠ المافيا أكثر من المدنيين!';
 
   return (
-    <section className="relative z-10 min-h-dvh px-4 py-5 sm:px-6 lg:px-8" dir="rtl">
-      <div className="mx-auto flex min-h-[calc(100dvh-2.5rem)] w-full max-w-6xl flex-col">
-        <header className="mb-5 flex flex-col gap-4 border-b border-[var(--color-divider)] pb-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="mb-2 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
-              <span className="h-px w-10 bg-[var(--color-primary)] opacity-60" />
-              Mafia
-            </div>
-            <h1 className="font-display text-[clamp(2.4rem,5vw,4.8rem)] leading-none text-[var(--color-text)]">إعداد اللعبة</h1>
+    <section className={styles.container} dir="rtl">
+      <div className={styles.inner}>
+        
+        {/* Header Details */}
+        <header className={styles.header}>
+          <div className={styles.headerSub}>
+            <span className={styles.headerSubLine} />
+            Mafia Setup
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
-            <div className="rounded-md border border-[var(--color-border)] bg-[rgba(20,18,16,0.68)] px-3 py-2 text-center">
-              <div className="text-[11px] text-[var(--color-text-faint)]">اللاعبون</div>
-              <div className="font-display text-xl text-[var(--color-primary)] tabular-nums">{n}/12</div>
-            </div>
-            <div className="rounded-md border border-[var(--color-border)] bg-[rgba(20,18,16,0.68)] px-3 py-2 text-center">
-              <div className="text-[11px] text-[var(--color-text-faint)]">المافيا</div>
-              <div className="font-display text-xl text-[var(--color-red-hover)] tabular-nums">{state.roleConfig.mafia}</div>
-            </div>
-            <div className="rounded-md border border-[var(--color-border)] bg-[rgba(20,18,16,0.68)] px-3 py-2 text-center">
-              <div className="text-[11px] text-[var(--color-text-faint)]">المدنيون</div>
-              <div className="font-display text-xl tabular-nums" style={{ color: n >= 4 && civil < 1 ? 'var(--color-red-hover)' : 'var(--color-green)' }}>
-                {n >= 4 ? civil : '—'}
-              </div>
-            </div>
-          </div>
+          <h1 className={styles.headerTitle}>إعداد اللعبة</h1>
         </header>
 
-        <div className="grid flex-1 gap-5 lg:grid-cols-[minmax(330px,0.9fr)_minmax(0,1.35fr)]">
-          <div className="flex flex-col gap-5">
-            <Panel className="p-4 sm:p-5">
-              <PanelTitle title="اللاعبون" meta={`${n}/12`} />
-              <div className="flex gap-2">
-                <input
+        {/* Tab Navigation */}
+        <div className={styles.tabs}>
+          <button
+            onClick={() => setActiveTab('players')}
+            className={`${styles.tabBtn} ${activeTab === 'players' ? styles.tabBtnActive : ''}`}
+          >
+            اللاعبون ({n})
+          </button>
+          <button
+            onClick={() => setActiveTab('roles')}
+            className={`${styles.tabBtn} ${activeTab === 'roles' ? styles.tabBtnActive : ''}`}
+          >
+            الأدوار ({state.roleConfig.mafia + specials})
+          </button>
+        </div>
+
+        {/* Tab Content: PLAYERS */}
+        {activeTab === 'players' && (
+          <div className={styles.tabContent}>
+            <Panel style={{padding: '1.25rem'}}>
+              <div className={styles.inputGroup}>
+                <Input
                   ref={inputRef}
-                  className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-all duration-[180ms] placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-primary)] focus:shadow-[0_0_0_2px_rgba(200,169,110,0.2)]"
-                  placeholder="اسم اللاعب..."
                   maxLength={30}
                   value={inputVal}
-                onChange={(e) => setInputVal(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') addPlayer(); }}
-              />
-                <button
-                  onClick={addPlayer}
-                  className="flex-shrink-0 rounded-md bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-[var(--color-text-inverse)] transition-colors duration-150 hover:bg-[var(--color-primary-hover)]"
-                >
-                  إضافة
-                </button>
+                  placeholder="اسم اللاعب الجديد..."
+                  style={{flex: 1, minWidth: 0}}
+                  onChange={(e) => setInputVal(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') addPlayer(); }}
+                />
+                <Button size="sm" onClick={addPlayer} style={{padding: '0 1rem', flexShrink: 0}}>إضافة</Button>
               </div>
 
-              <div className="mt-4 min-h-[104px]">
+              <div className={styles.playerList}>
                 {state.players.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                    {state.players.map((p, i) => (
-                      <div
-                        key={i}
-                        className="flex min-w-0 items-center gap-3 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2"
-                      >
-                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-highlight)] font-display text-sm text-[var(--color-primary)]">
-                          {p.charAt(0)}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate text-sm text-[var(--color-text)]">{p}</span>
-                        <button
-                          onClick={() => dispatch({ type: 'REMOVE_PLAYER', index: i })}
-                          className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-sm text-[var(--color-text-faint)] transition-colors hover:bg-[var(--color-red-highlight)] hover:text-[var(--color-red-hover)]"
-                          aria-label={`حذف ${p}`}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                  state.players.map((p, i) => (
+                    <div key={i} className={styles.playerItem}>
+                      <span className={styles.playerAvatar}>{p.charAt(0)}</span>
+                      <span className={styles.playerName}>{p}</span>
+                      <button onClick={() => dispatch({ type: 'REMOVE_PLAYER', index: i })} className={styles.playerRemove} aria-label={`حذف ${p}`}>×</button>
+                    </div>
+                  ))
                 ) : (
-                  <div className="flex h-[104px] items-center justify-center rounded-md border border-dashed border-[var(--color-border)] text-sm text-[var(--color-text-faint)]">
-                    أضف 4 لاعبين على الأقل
-                  </div>
+                  <div className={styles.emptyPlayers}>أضف 4 لاعبين على الأقل</div>
                 )}
               </div>
             </Panel>
+            
+            <Button variant="outline" onClick={() => setActiveTab('roles')} style={{width: '100%', borderStyle: 'dashed'}}>
+              متابعة لاختيار الأدوار ←
+            </Button>
+          </div>
+        )}
 
-            <Panel className="p-4 sm:p-5">
+        {/* Tab Content: ROLES */}
+        {activeTab === 'roles' && (
+          <div className={styles.tabContent}>
+            <Panel style={{padding: '1.25rem'}}>
               <PanelTitle title="وضع اللعبة" />
-              <div className="grid grid-cols-2 gap-2">
+              <div className={styles.grid2}>
                 {(['classic', 'advanced', 'chaos', 'custom'] as Preset[]).map(p => (
                   <button
                     key={p}
                     onClick={() => {
-                      if (p === 'custom') {
-                        setPreset(p);
-                        return;
-                      }
-                      setPreset(p);
-                      dispatch({ type: 'APPLY_PRESET', config: PRESET_CONFIGS[p] });
+                      if (p === 'custom') { setPreset(p); return; }
+                      setPreset(p); dispatch({ type: 'APPLY_PRESET', config: PRESET_CONFIGS[p] });
                     }}
-                    className={`min-h-[74px] rounded-md border px-3 py-3 text-start transition-all duration-150 ${
-                      preset === p
-                        ? 'border-[var(--color-primary)] bg-[var(--color-primary-highlight)] text-[var(--color-primary)] shadow-[0_0_0_1px_rgba(200,169,110,0.14)]'
-                        : 'border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
-                    }`}
+                    className={`${styles.presetBtn} ${preset === p ? styles.presetBtnActive : ''}`}
                     aria-pressed={preset === p}
                   >
-                    <span className="block text-sm font-semibold">{PRESET_LABELS[p]}</span>
-                    <span className="mt-1 block text-xs text-[var(--color-text-faint)]">{PRESET_DESCRIPTIONS[p]}</span>
+                    <span className={styles.presetLabel}>{PRESET_LABELS[p]}</span>
+                    <span className={styles.presetDesc}>{PRESET_DESCRIPTIONS[p]}</span>
                   </button>
                 ))}
               </div>
             </Panel>
 
-            <Panel className="p-4 sm:p-5">
-              <PanelTitle title="الجاهزية" />
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-[var(--color-text-muted)]">الأدوار الخاصة</span>
-                  <span className="font-display text-lg text-[var(--color-primary)] tabular-nums">{specials}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-[var(--color-text-muted)]">المدنيون</span>
-                  <span className="font-display text-lg tabular-nums" style={{ color: n >= 4 && civil < 1 ? 'var(--color-red-hover)' : 'var(--color-green)' }}>
-                    {n >= 4 ? civil : '—'}
-                  </span>
-                </div>
-                <div className={`rounded-md px-3 py-2 text-sm ${canStart ? 'bg-[rgba(39,174,96,0.12)] text-[#78d08c]' : 'bg-[var(--color-red-highlight)] text-[var(--color-red-hover)]'}`}>
-                  {canStart ? 'جاهز للتوزيع' : warning}
-                </div>
+            <Panel className={styles.rolesPanel}>
+              <div className={styles.rolesHeader}>
+                <h2 className={styles.rolesTitle}>الأدوار</h2>
+                <button type="button" onClick={() => setModalOpen(true)} className={styles.infoBtn}>شرح الأدوار</button>
+              </div>
+
+              <div className={styles.rolesBody}>
+                {CATEGORIES.map(cat => (
+                  <Category key={cat.key} cat={cat} n={n} specials={specials} onInfo={() => setModalOpen(true)} onCustom={() => setPreset('custom')} />
+                ))}
+              </div>
+            </Panel>
+            
+            {/* Quick summary before start */}
+            <Panel style={{padding: '1.25rem'}}>
+              <div className={styles.summaryRow}>
+                <span className={styles.summaryLabel}>إجمالي اللاعبين</span>
+                <span className={`${styles.summaryVal} ${styles.summaryValText}`}>{n}</span>
+              </div>
+              <div className={styles.summaryRow}>
+                <span className={styles.summaryLabel}>المدنيون</span>
+                <span className={`${styles.summaryVal}`} style={{ color: n >= 4 && civil < 1 ? 'var(--color-red-hover)' : 'var(--color-green)' }}>
+                  {n >= 4 ? civil : '—'}
+                </span>
+              </div>
+              <div className={styles.summaryRow}>
+                <span className={styles.summaryLabel}>المافيا والأدوار</span>
+                <span className={`${styles.summaryVal} ${styles.summaryValRed}`}>{state.roleConfig.mafia + specials}</span>
               </div>
             </Panel>
           </div>
+        )}
 
-          <Panel className="flex flex-col overflow-hidden">
-            <div className="flex flex-col gap-3 border-b border-[var(--color-border)] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-              <div>
-                <h2 className="font-display text-2xl text-[var(--color-primary)]">الأدوار</h2>
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">اختار التوازن قبل توزيع البطاقات.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setModalOpen(true)}
-                className="inline-flex items-center justify-center rounded-md border border-[var(--color-border)] px-4 py-2 text-sm text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-              >
-                شرح الأدوار
-              </button>
-            </div>
-
-            <div className="flex-1 space-y-3 p-4 sm:p-5">
-              {CATEGORIES.map(cat => (
-                <Category
-                  key={cat.key}
-                  cat={cat}
-                  n={n}
-                  specials={specials}
-                  onInfo={() => setModalOpen(true)}
-                  onCustom={() => setPreset('custom')}
-                />
-              ))}
-            </div>
-          </Panel>
-        </div>
-
-        <footer className="sticky bottom-0 z-20 mt-5 border-t border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(13,12,11,0.72),var(--color-bg)_42%)] py-4 backdrop-blur-md">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="text-sm text-[var(--color-text-muted)]">
-              {canStart ? 'كل شيء مضبوط. مرر الهاتف بعد كل بطاقة.' : warning}
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="lg"
-                className="flex-1 !px-8 !py-3 !text-sm md:flex-none"
-                onClick={() => dispatch({ type: 'START_GAME' })}
-                disabled={!canStart}
-              >
-                ابدأ التوزيع
-              </Button>
-              <Button
-                variant="ghost"
-                size="lg"
-                className="!px-5 !py-3 !text-sm"
-                onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'lobby' })}
-              >
-                رجوع
-              </Button>
-            </div>
-          </div>
-        </footer>
       </div>
+
+      {/* Fixed Bottom Action Bar */}
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          {!canStart && (
+            <div className={styles.warning}>{warning}</div>
+          )}
+          <div className={styles.footerActions}>
+            <Button variant="outline" size="sm" style={{flexBasis: '30%'}} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'lobby' })}>رجوع</Button>
+            <Button size="sm" style={{flex: 1}} onClick={() => dispatch({ type: 'START_GAME' })} disabled={!canStart}>ابدأ التوزيع</Button>
+          </div>
+        </div>
+      </footer>
 
       {/* ===== MODAL ===== */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="شرح الأدوار">
-        {Object.keys(ROLE_INFO).map(key => {
-          const r = ROLE_INFO[key];
-          return (
-            <div key={key} className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-md p-2.5 mb-1.5 last:mb-0">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-base w-7 text-center flex-shrink-0">{r.emoji}</span>
-                <span className="font-display text-xs text-[var(--color-text)] font-bold flex-1">{r.label}</span>
-                <TeamBadge teamClass={r.teamClass}>{r.team}</TeamBadge>
-              </div>
-              <div className="space-y-1">
-                <div>
-                  <div className="text-[9px] text-[var(--color-primary)] font-semibold tracking-wider uppercase">⚡ القدرة</div>
-                  <div className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">{r.ability}</div>
+        <div>
+          {Object.keys(ROLE_INFO).map(key => {
+            const r = ROLE_INFO[key];
+            return (
+              <div key={key} className={styles.modalItem}>
+                <div className={styles.modalItemHeader}>
+                  <span className={styles.modalItemEmoji}>{r.emoji}</span>
+                  <span className={styles.modalItemTitle}>{r.label}</span>
+                  <TeamBadge teamClass={r.teamClass}>{r.team}</TeamBadge>
                 </div>
                 <div>
-                  <div className="text-[9px] text-[var(--color-primary)] font-semibold tracking-wider uppercase">🏆 شروط الربح</div>
-                  <div className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">{r.winCondition}</div>
+                  <div className={styles.modalItemSection}>
+                    <div className={styles.modalItemSectionTitle}>⚡ القدرة</div>
+                    <div className={styles.modalItemSectionText}>{r.ability}</div>
+                  </div>
+                  <div className={styles.modalItemSection}>
+                    <div className={styles.modalItemSectionTitle}>🏆 شروط الربح</div>
+                    <div className={styles.modalItemSectionText}>{r.winCondition}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </Modal>
     </section>
   );

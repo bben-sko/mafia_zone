@@ -12,6 +12,8 @@ import Handoff from '@/screens/handoff';
 import CardScreen from '@/screens/card';
 import Discussion from '@/screens/discussion';
 import End from '@/screens/end';
+import { Button } from '@/components/ui';
+import styles from './page.module.css';
 
 function GameApp() {
   const { state } = useGame();
@@ -37,56 +39,55 @@ export default function Home() {
     <>
       <GrainOverlay />
       <Fireflies />
-      <section className="flex flex-col items-center justify-center min-h-dvh px-6" dir="rtl">
-        <div className="max-w-[380px] w-full text-center relative z-1">
-          <div className="flex items-center justify-center gap-3 font-display text-xl text-[var(--color-primary)] tracking-[0.15em] uppercase mb-6">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="1.5" opacity=".4" />
-              <path d="M16 4 L20 12 L28 13 L22 19 L24 27 L16 23 L8 27 L10 19 L4 13 L12 12 Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="16" cy="16" r="3" fill="currentColor" />
-            </svg>
-            Mafia
-          </div>
-          <div className="w-[60px] h-[1px] bg-[var(--color-primary)] mx-auto mb-6 opacity-30" />
-          <h1 className="font-display text-[clamp(3.5rem,10vw,6rem)] text-[var(--color-primary)] leading-[0.9] mb-4"
-            style={{ textShadow: '0 0 30px rgba(200,169,110,0.12)' }}
-          >
-            MAFIA
-          </h1>
-          <p className="text-sm text-[var(--color-text-muted)] mb-8 max-w-[30ch] mx-auto leading-relaxed">
-            لعبة الشك والخداع — من هو المافيا بين أصحابك؟
-          </p>
+      <section className={`screen-container ${styles.container}`} dir="rtl">
+        <div className={styles.ambientGlow} />
+        
+        <div className={styles.content}>
+          <div className={styles.heroWrapper}>
+            <div className={styles.heroBadge}>
+              <span className={styles.heroBadgeDot}>
+                <span className={styles.heroBadgeDotPing}></span>
+                <span className={styles.heroBadgeDotInner}></span>
+              </span>
+              <span className={styles.heroBadgeText}>لعبة الشك والخداع</span>
+            </div>
 
-          <div className="flex flex-col gap-3">
-            <button
+            <h1 className={styles.heroTitle}>MAFIA</h1>
+            <p className={styles.heroSubtitle}>
+              المدينة ناعسة... والمافيا كتخطط. شكون غايبقى حي حتى للصباح؟
+            </p>
+          </div>
+
+          <div className={styles.heroActions}>
+            <Button
               onClick={() => router.push('/room/create')}
-              className="w-full py-3 px-8 text-sm font-semibold tracking-wider uppercase rounded-md bg-[var(--color-primary)] text-[var(--color-text-inverse)] shadow-[0_2px_8px_rgba(200,169,110,0.4)] hover:bg-[var(--color-primary-hover)] transition-all duration-[180ms]"
+              className={styles.actionBtnOutline}
             >
-              إنشاء غرفة 🏠
-            </button>
-            <button
+              إنشاء غرفة جديدة <span>🏰</span>
+            </Button>
+            
+            <Button
+              variant="outline"
               onClick={() => router.push('/room')}
-              className="w-full py-3 px-8 text-sm font-semibold tracking-wider uppercase rounded-md bg-transparent text-[var(--color-text-muted)] border border-[var(--color-border)] hover:text-[var(--color-text)] hover:border-[var(--color-text-muted)] transition-all duration-[180ms]"
+              className={styles.actionBtnOutline}
             >
-              انضم إلى غرفة 🔗
-            </button>
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[var(--color-divider)]" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="px-3 text-[10px] text-[var(--color-text-faint)] bg-[var(--color-bg)]">أو</span>
+              انضم إلى غرفة <span>🔗</span>
+            </Button>
+            
+            <div className={styles.divider}>
+              <div className={styles.dividerLine} />
+              <div className={styles.dividerTextWrapper}>
+                <span className={styles.dividerText}>أو</span>
               </div>
             </div>
-            <button
-              onClick={() => {
-                // Uses GameProvider from layout
-                window.location.href = '/local';
-              }}
-              className="w-full py-3 px-8 text-xs font-semibold tracking-wider uppercase rounded-md bg-transparent text-[var(--color-text-faint)] border border-[var(--color-divider)] hover:text-[var(--color-text-muted)] hover:border-[var(--color-border)] transition-all duration-[180ms]"
+            
+            <Button
+              variant="ghost"
+              onClick={() => { window.location.href = '/local'; }}
+              className={styles.actionBtnGhost}
             >
-              لعبة محلية 🃏
-            </button>
+              لعبة محلية (هاتف واحد) 📱
+            </Button>
           </div>
         </div>
       </section>

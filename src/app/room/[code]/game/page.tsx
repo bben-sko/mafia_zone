@@ -8,6 +8,7 @@ import Fireflies from '@/components/fireflies';
 import { ROLES } from '@/lib/roles';
 import { RoleKey } from '@/lib/game-types';
 import { getSavedPlayer } from '@/lib/player-storage';
+import styles from './game.module.css';
 
 interface Player { id: string; name: string; isHost: boolean; }
 
@@ -68,14 +69,14 @@ function GameContent() {
 
   if (!playerId) return null;
   if (loading) return (
-    <section className="flex items-center justify-center min-h-dvh">
-      <p className="text-sm text-[var(--color-text-faint)]">جاري تحميل دورك...</p>
+    <section className={styles.centerMsg}>
+      <p className={styles.hint}>جاري تحميل دورك...</p>
     </section>
   );
   if (error || !role) return (
-    <section className="flex flex-col items-center justify-center min-h-dvh gap-4 px-6" dir="rtl">
-      <p className="text-sm text-[var(--color-red-hover)]">{error || 'لم يتم العثور على الدور'}</p>
-      <button onClick={() => router.push('/')} className="text-xs text-[var(--color-text-faint)] underline">الرجوع</button>
+    <section className={styles.errorMsg} dir="rtl">
+      <p className={styles.errorText}>{error || 'لم يتم العثور على الدور'}</p>
+      <button onClick={() => router.push('/')} className={styles.link}>الرجوع</button>
     </section>
   );
 
@@ -85,28 +86,25 @@ function GameContent() {
     <>
       <GrainOverlay />
       <Fireflies />
-      <section className="flex flex-col items-center justify-center min-h-dvh px-6" dir="rtl">
-        <div className="max-w-[320px] w-full text-center relative z-1 flex flex-col items-center gap-6">
-          <div className="text-xs text-[var(--color-text-faint)] tracking-wider uppercase">
-            دورك في اللعبة
-          </div>
+      <section className={styles.container} dir="rtl">
+        <div className={styles.inner}>
+          <div className={styles.title}>دورك في اللعبة</div>
 
           {/* card */}
-          <div className={`card-scene ${flipped ? '' : ''}`} onClick={() => setFlipped(true)}>
+          <div className="card-scene" onClick={() => setFlipped(true)}>
             <div className={`card-3d ${flipped ? 'flipped' : ''}`}>
-              <div className="card-face card-back">
-                <div className="card-back-pattern" />
+              <div className={`card-face card-back ${styles.cardFaceBack}`}>
                 <div className="card-back-title font-display text-xl text-[var(--color-primary)] tracking-wider uppercase relative z-1">MAFIA</div>
                 <div className="card-back-hint text-xs text-[var(--color-text-faint)] tracking-wider uppercase relative z-1">
                   {flipped ? '' : 'اقلب للكشف'}
                 </div>
               </div>
-              <div className="card-face card-front" style={{
+              <div className={`card-face card-front ${styles.cardFaceFront}`} style={{
                 background: role === 'mafia' ? 'linear-gradient(160deg,#1a0808,#2d0f0f,#1a0808)' :
                   'linear-gradient(160deg,#0a150a,#0f2010,#0a150a)',
                 border: role === 'mafia' ? '1px solid rgba(192,57,43,0.4)' : '1px solid rgba(39,174,96,0.4)',
               }}>
-                <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{
+                <div className={styles.roleIconBox} style={{
                   background: role === 'mafia' ? 'rgba(192,57,43,0.2)' : 'rgba(39,174,96,0.2)',
                   border: role === 'mafia' ? '1px solid rgba(192,57,43,0.4)' : '1px solid rgba(39,174,96,0.4)',
                 }}>
@@ -114,30 +112,20 @@ function GameContent() {
                     dangerouslySetInnerHTML={{ __html: rc.icon }}
                   />
                 </div>
-                <div className="font-display text-xl font-bold text-center tracking-wider"
-                  style={{ color: role === 'mafia' ? '#e05555' : '#5dba6e' }}
-                >
+                <div className={styles.roleTitle} style={{ color: role === 'mafia' ? '#e05555' : '#5dba6e' }}>
                   {rc.label}
                 </div>
-                <div className="text-sm text-[var(--color-text-muted)] text-center leading-relaxed px-4">
-                  {rc.description}
-                </div>
-                <div className="text-xs text-[var(--color-text-faint)] tracking-wider uppercase pt-2 px-4 border-t border-[var(--color-divider)] w-full text-center">
-                  {playerName}
-                </div>
+                <div className={styles.roleDesc}>{rc.description}</div>
+                <div className={styles.playerName}>{playerName}</div>
               </div>
             </div>
           </div>
 
-          {!flipped && (
-            <p className="text-xs text-[var(--color-text-muted)]">اضغط على البطاقة لرؤية دورك</p>
-          )}
+          {!flipped && <p className={styles.hint}>اضغط على البطاقة لرؤية دورك</p>}
 
           {flipped && (
-            <div className="flex flex-col gap-2 w-full max-w-[240px]">
-              <button onClick={() => router.push(`/room/${code}?playerId=${playerId}`)}
-                className="w-full py-2.5 text-xs font-semibold tracking-wider uppercase rounded-md bg-transparent text-[var(--color-text-faint)] border border-[var(--color-border)] hover:text-[var(--color-text-muted)] transition-all"
-              >
+            <div className={styles.actions}>
+              <button onClick={() => router.push(`/room/${code}?playerId=${playerId}`)} className={styles.actionBtn}>
                 العودة للغرفة
               </button>
               {isHost && (
@@ -148,9 +136,7 @@ function GameContent() {
                     body: JSON.stringify({ action: 'reset_game' }),
                   });
                   router.push(`/room/${code}?playerId=${playerId}`);
-                }}
-                  className="w-full py-2.5 text-xs font-semibold tracking-wider uppercase rounded-md bg-[var(--color-primary)] text-[var(--color-text-inverse)] shadow-[0_2px_8px_rgba(200,169,110,0.4)] hover:bg-[var(--color-primary-hover)] transition-all"
-                >
+                }} className={styles.primaryBtn}>
                   إعادة اللعبة
                 </button>
               )}

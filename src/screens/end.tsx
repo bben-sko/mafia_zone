@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useGame } from '@/context/game-context';
 import { Button } from '@/components/ui';
+import styles from './end.module.css';
 
 export default function End() {
   const { dispatch } = useGame();
@@ -36,15 +37,21 @@ export default function End() {
   }, []);
 
   return (
-    <section className="view active flex flex-col items-center justify-center min-h-dvh px-4 py-8 relative z-1 gap-8 text-center" dir="rtl">
-      <div ref={containerRef}>
-        <h2 className="font-display text-[clamp(2rem,1.2rem+2.5vw,3.5rem)] text-[var(--color-primary)]">تم التوزيع!</h2>
-        <p className="text-base text-[var(--color-text-muted)] max-w-[40ch] mx-auto mt-4">
-          كل واحد عارف دوره — بداو اللعبة!
+    <section className={`screen-container view active ${styles.container}`} dir="rtl">
+      <div className={styles.bgGlow} />
+      
+      <div ref={containerRef} className={styles.inner}>
+        <div className={styles.iconWrapper}>
+          <span className={styles.icon}>✓</span>
+        </div>
+        <h2 className={styles.title}>تم التوزيع!</h2>
+        <p className={styles.desc}>
+          كل واحد عارف دوره... المافيا كتخطط والمدينة ناعسة.
         </p>
       </div>
-      <div className="flex flex-col gap-3 items-center">
-        <Button size="lg" onClick={() => dispatch({ type: 'RESET_GAME' })}>لعبة جديدة</Button>
+
+      <div className={styles.footer}>
+        <Button size="lg" className={styles.btn} onClick={() => dispatch({ type: 'RESET_GAME' })}>لعبة جديدة 🔄</Button>
       </div>
     </section>
   );

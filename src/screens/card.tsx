@@ -6,6 +6,7 @@ import { useGame } from '@/context/game-context';
 import { Button } from '@/components/ui';
 import { ROLES } from '@/lib/roles';
 import { RoleKey } from '@/lib/game-types';
+import styles from './card.module.css';
 
 export default function CardScreen() {
   const { state, dispatch } = useGame();
@@ -37,60 +38,72 @@ export default function CardScreen() {
     if (card3d) card3d.classList.add('flipped');
     setTimeout(() => {
       setRevealedIndex(state.currentIndex);
-      gsap.fromTo('#card-next-btn', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+      gsap.fromTo('#card-next-btn-container', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: 'back.out(1.2)' });
     }, 750);
   };
 
   return (
-    <section className="view active relative z-10 flex min-h-dvh flex-col items-center justify-center gap-6 px-4 py-8" dir="rtl">
-      <div ref={containerRef} className="flex flex-col items-center gap-6">
-        <div className="font-display text-xl text-[var(--color-text)] text-center">{player}</div>
-        <p className="text-sm text-[var(--color-text-muted)] text-center">اقلب البطاقة باش تشوف دورك 👇</p>
+    <section className={`view active ${styles.container}`} dir="rtl">
+      <div ref={containerRef} className={styles.inner}>
+        <div className={styles.header}>
+          <div className={styles.headerSub}>دور اللاعب</div>
+          <div className={styles.headerTitle}>{player}</div>
+          <p className={styles.headerDesc}>اضغط على البطاقة باش تشوف دورك 👇</p>
+        </div>
 
-        <div className="card-scene" onClick={flipCard}>
-          <div ref={cardRef} className="card-3d" id="card-scene-3d">
-            <div className="card-face card-back">
-              <div className="card-back-pattern" />
-              <div className="card-back-title relative z-10 font-display text-xl uppercase tracking-wider text-[var(--color-primary)]">MAFIA</div>
-              <div className="card-back-hint relative z-10 text-xs uppercase tracking-wider text-[var(--color-text-faint)]">اقلب للكشف</div>
-            </div>
-            <div className={`card-face card-front ${rc.class}`} style={{
-              background: role === 'mafia' ? 'linear-gradient(160deg,#1a0808,#2d0f0f,#1a0808)' :
-                          role === 'civil' ? 'linear-gradient(160deg,#0a150a,#0f2010,#0a150a)' :
-                          role === 'detective' ? 'linear-gradient(160deg,#080a1a,#0f112d,#080a1a)' :
-                          role === 'doctor' ? 'linear-gradient(160deg,#15100a,#251a0a,#15100a)' :
-                          role === 'chouafa' ? 'linear-gradient(160deg,#0f081a,#1a0d2d,#0f081a)' :
-                          role === 'laadoul' ? 'linear-gradient(160deg,#121214,#1a1a1d,#121214)' :
-                          role === 'spy' ? 'linear-gradient(160deg,#0a1a0a,#0f2a10,#0a1a0a)' :
-                          role === 'mayor' ? 'linear-gradient(160deg,#1a140a,#2a1f0a,#1a140a)' :
-                          'linear-gradient(160deg,#1a0808,#2d0f0f,#1a0808)'
-            }}>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{
-                background: 'rgba(192,57,43,0.2)',
-                border: '1px solid rgba(192,57,43,0.4)'
-              }}>
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" dangerouslySetInnerHTML={{ __html: rc.icon }} />
+        <div className={`card-scene ${styles.cardContainer}`} onClick={flipCard}>
+          <div ref={cardRef} className={`card-3d ${styles.cardContent}`} id="card-scene-3d">
+            <div className={`card-face card-back ${styles.cardFace}`}>
+              <div className={styles.cardBackBg} />
+              <div className={styles.cardBackInner}>
+                <div className={styles.cardIconWrapper}>
+                  <span className={styles.cardIcon}>🎭</span>
+                </div>
+                <div className={styles.cardMafiaText}>MAFIA</div>
+                <div className={styles.cardTapText}>اضغط للفتح</div>
               </div>
-              <div className={`font-display text-xl font-bold text-center tracking-wider`} style={{
-                color: role === 'mafia' ? '#e05555' :
-                       role === 'civil' ? '#5dba6e' :
-                       role === 'detective' ? '#5599dd' :
-                       role === 'doctor' ? '#ddbb55' : '#e05555'
+            </div>
+            <div className={`card-face card-front ${styles.cardFace}`} style={{overflow: 'hidden'}}>
+              <div className={styles.cardFrontBg} style={{
+                background: role === 'mafia' ? 'radial-gradient(circle at top, var(--color-red) 0%, transparent 70%)' :
+                            role === 'civil' ? 'radial-gradient(circle at top, var(--color-green) 0%, transparent 70%)' :
+                            role === 'detective' ? 'radial-gradient(circle at top, var(--color-blue) 0%, transparent 70%)' :
+                            role === 'doctor' ? 'radial-gradient(circle at top, var(--color-amber) 0%, transparent 70%)' :
+                            role === 'chouafa' ? 'radial-gradient(circle at top, var(--color-teal) 0%, transparent 70%)' :
+                            role === 'laadoul' ? 'radial-gradient(circle at top, var(--color-rose) 0%, transparent 70%)' :
+                            'radial-gradient(circle at top, var(--color-text-muted) 0%, transparent 70%)'
+              }} />
+              
+              <div className={styles.cardFrontIconWrapper}>
+                <svg className={styles.cardFrontIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" dangerouslySetInnerHTML={{ __html: rc.icon }} />
+              </div>
+              <div className={styles.cardRoleLabel} style={{
+                color: role === 'mafia' ? 'var(--color-red)' :
+                       role === 'civil' ? 'var(--color-green)' :
+                       role === 'detective' ? 'var(--color-blue)' :
+                       role === 'doctor' ? 'var(--color-amber)' : 'var(--color-text)'
               }}>
                 {rc.label}
               </div>
-              <div className="text-sm text-[var(--color-text-muted)] text-center leading-relaxed">{rc.description}</div>
-              <div className="text-xs text-[var(--color-text-faint)] tracking-wider uppercase pt-2 px-4 border-t border-[var(--color-divider)] w-full text-center">{player}</div>
+              <div className={styles.cardRoleDesc}>{rc.description}</div>
+              <div className={styles.cardPlayerInfo}>
+                <div className={styles.cardPlayerLabel}>دور اللاعب</div>
+                <div className={styles.cardPlayerName}>{player}</div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div id="card-next-btn" style={{ display: showNext ? 'inline-flex' : 'none' }}>
+      <div id="card-next-btn-container" className={styles.footer} style={{ opacity: 0 }}>
+        <div className={styles.footerInner}>
           <Button
             size="lg"
+            className={styles.footerBtn}
+            style={{ pointerEvents: showNext ? 'auto' : 'none' }}
             onClick={() => dispatch({ type: 'AFTER_CARD_FLIP' })}
           >
-            {state.currentIndex === state.shuffled.length - 1 ? 'تأكيد ✓' : 'التالي →'}
+            {state.currentIndex === state.shuffled.length - 1 ? 'إنهاء التوزيع ✓' : 'متابعة لللاعب التالي →'}
           </Button>
         </div>
       </div>

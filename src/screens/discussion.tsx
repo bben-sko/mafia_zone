@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useGame } from '@/context/game-context';
-import { Button } from '@/components/ui';
+import styles from './discussion.module.css';
 
 export default function Discussion() {
   const { state, dispatch } = useGame();
@@ -27,7 +27,7 @@ export default function Discussion() {
     };
   }, [state.timerRunning, dispatch]);
 
-  const r = 88;
+  const r = 140; // larger radius for viewBox 320
   const circ = 2 * Math.PI * r;
   const pct = state.timerDuration > 0 ? state.timerRemaining / state.timerDuration : 0;
 
@@ -41,7 +41,7 @@ export default function Discussion() {
     if (state.timerRemaining === 0 && state.timerStarted) {
       const fill = document.getElementById('timer-fill');
       if (fill) {
-        gsap.to(fill, { attr: { strokeWidth: 12 }, duration: 0.3, yoyo: true, repeat: 5, ease: 'power1.inOut', onComplete: () => gsap.set(fill, { attr: { strokeWidth: 8 } }) });
+        gsap.to(fill, { attr: { strokeWidth: 20 }, duration: 0.3, yoyo: true, repeat: 5, ease: 'power1.inOut', onComplete: () => gsap.set(fill, { attr: { strokeWidth: 12 } }) });
       }
       const banner = document.getElementById('timeup-banner');
       if (banner) {
@@ -63,95 +63,115 @@ export default function Discussion() {
   }, [state.timerRemaining, state.timerStarted]);
 
   return (
-    <section className="view active flex flex-col items-center justify-center min-h-dvh px-4 py-8 relative z-1 gap-8 text-center" dir="rtl">
-      <div ref={containerRef}>
-        <div className="font-display text-xl text-[var(--color-text)]">وقت النقاش 🗣️</div>
-        <p className="text-sm text-[var(--color-text-muted)] max-w-[36ch] mx-auto mt-2">ناقشو بيناتكم !؟</p>
+    <section className={`view active ${styles.container}`} dir="rtl">
+      <div ref={containerRef} className={styles.header}>
+        <div className={styles.headerSub}>المرحلة الحالية</div>
+        <div className={styles.headerTitle}>وقت النقاش 🗣️</div>
+        <p className={styles.headerDesc}>ناقشو بيناتكم وحاولو تعرفو المافيا!</p>
       </div>
 
-      {/* Duration Picker */}
-      <div>
-        <div className="text-xs text-[var(--color-text-muted)] text-center mb-3 tracking-wider uppercase">مدة النقاش</div>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {[60, 120, 180, 300].map(secs => (
-            <button
-              key={secs}
-              className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wider cursor-pointer border transition-all duration-[180ms] ${state.timerDuration === secs && !state.timerStarted ? 'bg-[var(--color-primary)] text-[var(--color-text-inverse)] border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'}`}
-              onClick={() => !state.timerStarted && dispatch({ type: 'SELECT_DURATION', val: secs })}
-            >
-              {secs === 60 ? '1 دقيقة' : secs === 120 ? '2 دقيقة' : secs === 180 ? '3 دقائق' : '5 دقائق'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Timer */}
-      <div className="flex flex-col items-center gap-6">
-        <div className="relative w-[200px] h-[200px]">
-          <svg width="200" height="200" viewBox="0 0 200 200" style={{ transform: 'rotate(-90deg)' }}>
-            <circle className="timer-track" cx="100" cy="100" r={r} fill="none" stroke="var(--color-surface-dynamic)" strokeWidth="8" />
+      <div className={styles.content}>
+        
+        {/* Timer UI */}
+        <div className={styles.timerWrapper}>
+          <svg width="100%" height="100%" viewBox="0 0 320 320" style={{ transform: 'rotate(-90deg)' }}>
+            <circle cx="160" cy="160" r={r} fill="none" stroke="var(--color-surface-2)" strokeWidth="6" />
             <circle
               id="timer-fill"
-              cx="100"
-              cy="100"
+              cx="160"
+              cy="160"
               r={r}
               fill="none"
               stroke={fillColor}
-              strokeWidth="8"
+              strokeWidth="6"
               strokeLinecap="round"
               strokeDasharray={circ}
               strokeDashoffset={circ * (1 - pct)}
-              style={{ transition: 'stroke 0.5s ease' }}
+              style={{ transition: 'stroke 0.5s ease', filter: pct <= 0.25 ? 'drop-shadow(0 0 8px rgba(224,85,85,0.4))' : 'none' }}
             />
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-[4px]">
-            <div className="font-display text-[clamp(2rem,1.2rem+2.5vw,3.5rem)] text-[var(--color-text)] tabular-nums leading-none" style={{ color: timeColor }}>
+          <div className={styles.timerDisplay}>
+            <div className={styles.timerValue} style={{ color: timeColor }}>
               {String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}
             </div>
-            <div className="text-xs text-[var(--color-text-faint)] tracking-wider uppercase">
-              {state.timerRunning ? 'يشتغل' : state.timerStarted ? 'موقوف' : 'جاهز'}
+            <div className={styles.timerStatus}>
+              {state.timerRunning ? 'يشتغل...' : state.timerStarted ? 'موقوف' : 'جاهز للبدء'}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex gap-3 items-center">
-            <Button
-              variant="ghost" size="sm"
-              onClick={() => dispatch({ type: 'ADJUST_TIMER', delta: -30 })}
-              disabled={state.timerRemaining <= 10}
-            >
-              −30s
-            </Button>
-            <Button onClick={() => dispatch({ type: 'TOGGLE_TIMER' })}>
-              {state.timerRunning ? '⏸ وقف' : state.timerStarted ? '▶ استمر' : '▶ ابدأ'}
-            </Button>
-            <Button
-              variant="ghost" size="sm"
-              onClick={() => dispatch({ type: 'ADJUST_TIMER', delta: 30 })}
-              disabled={state.timerRemaining >= state.timerDuration + 120}
-            >
-              +30s
-            </Button>
-          </div>
-          {state.timerStarted && (
-            <Button variant="ghost" size="sm" onClick={() => dispatch({ type: 'RESTART_TIMER' })}>
-              ↺ إعادة
-            </Button>
+        {/* Timer Controls */}
+        <div className={styles.controlsWrapper}>
+          {!state.timerStarted ? (
+            <div className={styles.durationCard}>
+              <div className={styles.durationTitle}>اختر مدة النقاش</div>
+              <div className={styles.durationGrid}>
+                {[60, 120, 180, 300].map(secs => (
+                  <button
+                    key={secs}
+                    className={`${styles.durationBtn} ${state.timerDuration === secs ? styles.durationBtnActive : styles.durationBtnInactive}`}
+                    onClick={() => dispatch({ type: 'SELECT_DURATION', val: secs })}
+                  >
+                    {secs === 60 ? 'دقيقة واحدة' : secs === 120 ? 'دقيقتين' : secs === 180 ? '3 دقائق' : '5 دقائق'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className={styles.activeControls}>
+              <div className={styles.activeButtons}>
+                <button
+                  className={styles.adjustBtn}
+                  onClick={() => dispatch({ type: 'ADJUST_TIMER', delta: -30 })}
+                  disabled={state.timerRemaining <= 10}
+                >
+                  −30
+                </button>
+                
+                <button 
+                  className={`${styles.playPauseBtn} ${state.timerRunning ? styles.playPauseRunning : styles.playPauseStopped}`}
+                  onClick={() => dispatch({ type: 'TOGGLE_TIMER' })}
+                >
+                  {state.timerRunning ? '⏸' : '▶'}
+                </button>
+                
+                <button
+                  className={styles.adjustBtn}
+                  onClick={() => dispatch({ type: 'ADJUST_TIMER', delta: 30 })}
+                  disabled={state.timerRemaining >= state.timerDuration + 120}
+                >
+                  +30
+                </button>
+              </div>
+              <button 
+                className={styles.resetBtn}
+                onClick={() => dispatch({ type: 'RESTART_TIMER' })}
+              >
+                ↺ إعادة ضبط الوقت
+              </button>
+            </div>
           )}
         </div>
+      </div>
+
+      {/* Fixed bottom actions */}
+      <div className={styles.footer}>
+        <button 
+          className={styles.endBtn}
+          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'end' })}
+        >
+          إنهاء النقاش والتصويت →
+        </button>
       </div>
 
       {/* Time up banner */}
       <div
         id="timeup-banner"
-        className="fixed bottom-0 left-0 right-0 z-[999] bg-[var(--color-red)] text-white text-center py-4 font-semibold text-base"
+        className={styles.timeupBanner}
         style={{ transform: state.timerRemaining === 0 && state.timerStarted ? 'translateY(0)' : 'translateY(100%)' }}
       >
         ⏰ انتهى الوقت! ابداو التصويت
       </div>
-
-      <Button variant="ghost" onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'end' })}>تخطي</Button>
     </section>
   );
 }
