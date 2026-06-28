@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 import GrainOverlay from '@/components/grain-overlay';
 import Fireflies from '@/components/fireflies';
@@ -14,10 +14,10 @@ interface Player { id: string; name: string; isHost: boolean; }
 
 function GameContent() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const code = (params.code as string).toUpperCase();
-  const playerId = searchParams.get('playerId');
+  const savedPlayer = getSavedPlayer();
+  const playerId = savedPlayer.id;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [role, setRole] = useState<RoleKey | null>(null);
@@ -27,11 +27,6 @@ function GameContent() {
 
   useEffect(() => {
     if (!playerId) {
-      const saved = getSavedPlayer();
-      if (saved.id) {
-        router.replace(`/room/${code}/game?playerId=${saved.id}`);
-        return;
-      }
       router.replace(`/room?code=${code}`);
       return;
     }
@@ -44,7 +39,7 @@ function GameContent() {
 
         if (data.status !== 'playing') {
           // Game hasn't started yet, go back to lobby
-          router.push(`/room/${code}?playerId=${playerId}`);
+          router.push(`/room/${code}`);
           return;
         }
 
@@ -125,7 +120,7 @@ function GameContent() {
 
           {flipped && (
             <div className={styles.actions}>
-              <button onClick={() => router.push(`/room/${code}?playerId=${playerId}`)} className={styles.actionBtn}>
+              <button onClick={() => router.push(`/room/${code}`)} className={styles.actionBtn}>
                 العودة للغرفة
               </button>
               {isHost && (
@@ -135,7 +130,7 @@ function GameContent() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'reset_game' }),
                   });
-                  router.push(`/room/${code}?playerId=${playerId}`);
+                  router.push(`/room/${code}`);
                 }} className={styles.primaryBtn}>
                   إعادة اللعبة
                 </button>

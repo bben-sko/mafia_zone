@@ -38,7 +38,7 @@ export async function PATCH(
 
     // --- JOIN ---
     if (body.action === 'join') {
-      const { playerName } = body;
+      const { playerName, playerId: existingId } = body;
       if (!playerName || typeof playerName !== 'string') {
         return NextResponse.json({ error: 'Name is required' }, { status: 400 });
       }
@@ -48,10 +48,20 @@ export async function PATCH(
       if (room.status !== 'waiting') return NextResponse.json({ error: 'Game already started' }, { status: 400 });
 
       const players = room.players as Array<{ id: string; name: string; isHost: boolean }>;
-      if (players.length >= 12) return NextResponse.json({ error: 'Room is full' }, { status: 400 });
+      const trimmedName = playerName.trim();
 
-      const playerId = crypto.randomUUID();
-      players.push({ id: playerId, name: playerName.trim(), isHost: false });
+      let playerId = existingId;
+      const existingIndex = existingId ? players.findIndex((p) => p.id === existingId) : -1;
+      if (existingIndex !== -1) {
+        players[existingIndex].name = trimmedName;
+      } else {
+        const nameTaken = players.some((p) => p.name.toLowerCase() === trimmedName.toLowerCase());
+        if (nameTaken) {
+          return NextResponse.json({ error: 'Name already taken' }, { status: 409 });
+        }
+        playerId = crypto.randomUUID();
+        players.push({ id: playerId, name: trimmedName, isHost: false });
+      }
 
       await prisma.room.update({
         where: { code: roomCode },

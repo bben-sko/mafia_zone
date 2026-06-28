@@ -34,7 +34,7 @@ export default function CreateRoom() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create room');
       savePlayer(data.playerId, trimmed);
-      router.push(`/room/${data.code}?playerId=${data.playerId}`);
+      router.push(`/room/${data.code}`);
     } catch (err: any) {
       setError(err.message);
     } finally {

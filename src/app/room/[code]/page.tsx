@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 import { getSavedPlayer } from '@/lib/player-storage';
 import GrainOverlay from '@/components/grain-overlay';
@@ -71,7 +71,7 @@ function RoomLobby({ code, playerId, players, isHost, gameState, onUpdate }: {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       // Navigate to game page
-      router.push(`/room/${code}/game?playerId=${playerId}`);
+      router.push(`/room/${code}/game`);
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -252,10 +252,10 @@ function RoomLobby({ code, playerId, players, isHost, gameState, onUpdate }: {
 /* ---------- content ---------- */
 function RoomContent() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const code = (params.code as string).toUpperCase();
-  const playerId = searchParams.get('playerId');
+  const savedPlayer = getSavedPlayer();
+  const playerId = savedPlayer.id;
   const [players, setPlayers] = useState<Player[]>([]);
   const [gameState, setGameState] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -269,22 +269,17 @@ function RoomContent() {
       setPlayers(data.players);
       setGameState(data.gameState || {});
       if (data.status === 'playing') {
-        router.push(`/room/${code}/game?playerId=${playerId}`);
+        router.push(`/room/${code}/game`);
       }
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [code, playerId, router]);
+  }, [code, router]);
 
   useEffect(() => {
     if (!playerId) {
-      const saved = getSavedPlayer();
-      if (saved.id) {
-        router.replace(`/room/${code}?playerId=${saved.id}`);
-        return;
-      }
       router.replace(`/room?code=${code}`);
       return;
     }

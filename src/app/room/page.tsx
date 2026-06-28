@@ -43,7 +43,7 @@ function JoinForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to join room');
       savePlayer(data.playerId, trimmed);
-      router.push(`/room/${roomCode}?playerId=${data.playerId}`);
+      router.push(`/room/${roomCode}`);
     } catch (err: any) {
       setError(err.message);
     } finally {
