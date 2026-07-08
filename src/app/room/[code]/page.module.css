@@ -111,6 +111,25 @@
   font-weight: 600;
 }
 
+.kickBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-red);
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  margin-right: auto; /* Push to the end if flex-direction is rtl or just use flex: 1 on name to push it naturally, but margin-right auto helps when name has flex: 1 */
+}
+
+.kickBtn:hover {
+  opacity: 1;
+}
+
 .badges {
   display: flex;
   flex-wrap: wrap;

@@ -70,6 +70,26 @@ export async function PATCH(
       return NextResponse.json({ playerId, players });
     }
 
+    // --- KICK PLAYER ---
+    if (body.action === 'kick_player') {
+      const { hostId, targetId } = body;
+      const room = await prisma.room.findUnique({ where: { code: roomCode } });
+      if (!room) return NextResponse.json({ error: 'Room not found' }, { status: 404 });
+      if (room.status !== 'waiting') return NextResponse.json({ error: 'Game already started' }, { status: 400 });
+
+      const players = room.players as Array<{ id: string; name: string; isHost: boolean }>;
+      const isHostRequest = players.some(p => p.id === hostId && p.isHost);
+      if (!isHostRequest) return NextResponse.json({ error: 'Only host can kick players' }, { status: 403 });
+
+      const updatedPlayers = players.filter(p => p.id !== targetId);
+
+      await prisma.room.update({
+        where: { code: roomCode },
+        data: { players: updatedPlayers },
+      });
+      return NextResponse.json({ ok: true });
+    }
+
     // --- UPDATE SETTINGS ---
     if (body.action === 'update_settings') {
       const { settings } = body;

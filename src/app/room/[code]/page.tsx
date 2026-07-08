@@ -60,6 +60,20 @@ function RoomLobby({ code, playerId, players, isHost, gameState, onUpdate }: {
     } catch {}
   }, [code]);
 
+  const kickPlayer = async (targetId: string) => {
+    if (!isHost || starting) return;
+    try {
+      await fetch(`/api/rooms/${code}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'kick_player', hostId: playerId, targetId }),
+      });
+      onUpdate();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   const startGame = async () => {
     setStarting(true);
     try {
@@ -127,6 +141,15 @@ function RoomLobby({ code, playerId, players, isHost, gameState, onUpdate }: {
                   <span className={styles.playerName}>{p.name}</span>
                   {p.isHost && <span className={styles.tagHost}>المضيف</span>}
                   {p.id === playerId && <span className={styles.tagYou}>أنت</span>}
+                  {isHost && !p.isHost && p.id !== playerId && (
+                    <button 
+                      onClick={() => kickPlayer(p.id)} 
+                      className={styles.kickBtn}
+                      title="طرد اللاعب"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -266,6 +289,13 @@ function RoomContent() {
       const res = await fetch(`/api/rooms/${code}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      
+      const isPlayerInRoom = data.players.some((p: Player) => p.id === playerId);
+      if (!isPlayerInRoom) {
+        router.push('/');
+        return;
+      }
+
       setPlayers(data.players);
       setGameState(data.gameState || {});
       if (data.status === 'playing') {
@@ -276,7 +306,7 @@ function RoomContent() {
     } finally {
       setLoading(false);
     }
-  }, [code, router]);
+  }, [code, router, playerId]);
 
   useEffect(() => {
     if (!playerId) {
